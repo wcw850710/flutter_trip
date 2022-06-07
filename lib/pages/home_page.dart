@@ -11,7 +11,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List _imageUrls = [
+  final _imageUrls = [
     'http://s.newtalk.tw/album/album/1/5f292c6b25a74.jpg',
     'http://s.newtalk.tw/album/album/1/5f2ba1d3d0c83.jpg',
     'http://s.newtalk.tw/album/album/1/5f2bd3ae5e8ee.jpg'
