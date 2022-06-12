@@ -6,6 +6,7 @@ import 'package:flutter_trip/model/grid_nav_model.dart';
 import 'package:flutter_trip/model/home_model.dart';
 import 'package:flutter_trip/model/sales_box_model.dart';
 import 'package:flutter_trip/widgets/grid_nav.dart';
+import 'package:flutter_trip/widgets/loading_container.dart';
 import 'package:flutter_trip/widgets/local_nav.dart';
 import 'package:flutter_trip/widgets/sales_box.dart';
 import 'package:flutter_trip/widgets/sub_nav.dart';
@@ -26,6 +27,7 @@ class _HomePageState extends State<HomePage> {
   GridNavModel? _gridNavModel;
   SalesBoxModel? _salesBoxModel;
   double _appBarAlpha = 0;
+  bool _loading = true;
 
   @override
   void initState() {
@@ -46,6 +48,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   _loadData() async {
+    if (!_loading) {
+      setState(() {
+        _loading = true;
+      });
+    }
+
     try {
       HomeModel model = await HomeDao.fetch();
       setState(() {
@@ -58,82 +66,101 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       print(e);
     }
+
+    _loading = false;
+  }
+
+  Future<void> _onRefresh() async {
+    _loadData();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xfff2f2f2),
-      body: Stack(
-        children: [
-          MediaQuery.removePadding(
-            context: context,
-            removeTop: true, // 移除上方安全區域
-            child: NotificationListener(
-              onNotification: (ScrollNotification ev) {
-                // 是 listview 滾動時才觸發, depth 是 child 第 ? 個可滾動元素
-                if (ev is ScrollUpdateNotification && ev.depth == 0) {
-                  _onScroll(ev.metrics.pixels);
-                }
-                return false;
-              },
-              child: ListView(
-                children: [
-                  SizedBox(
-                    height: 160,
-                    child: Swiper(
-                      itemCount: _bannerList.length,
-                      autoplay: true,
-                      itemBuilder: (BuildContext context, int i) {
-                        return Image.network(
-                          _bannerList[i].icon!,
-                          fit: BoxFit.cover,
-                        );
-                      },
-                      pagination: const SwiperPagination(),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
-                    child: LocalNav(localNavList: _localNavList),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
-                    child: GridNav(
-                      gridNavModel: _gridNavModel,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
-                    child: SubNav(
-                      subNavList: _subNavList,
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(top: 8),
-                    child: SalesBox(
-                      salesBoxModel: _salesBoxModel,
-                    ),
-                  )
-                ],
-              ),
-            ),
-          ),
-          Opacity(
-            opacity: _appBarAlpha,
-            child: Container(
-              height: 80,
-              decoration: const BoxDecoration(color: Colors.white),
-              child: const Center(
-                child: Padding(
-                  padding: EdgeInsets.only(top: 20),
-                  child: Text('首頁'),
+      backgroundColor: const Color(0xfff2f2f2),
+      body: LoadingContainer(
+        loading: _loading,
+        child: Stack(
+          children: [
+            MediaQuery.removePadding(
+              context: context,
+              removeTop: true, // 移除上方安全區域
+              child: RefreshIndicator(
+                // RefreshIndicator - 下拉刷新組件
+                onRefresh: _onRefresh,
+                child: NotificationListener(
+                  onNotification: (ScrollNotification ev) {
+                    // 是 listview 滾動時才觸發, depth 是 child 第 ? 個可滾動元素
+                    if (ev is ScrollUpdateNotification && ev.depth == 0) {
+                      _onScroll(ev.metrics.pixels);
+                    }
+                    return false;
+                  },
+                  child: _listView,
                 ),
               ),
             ),
-          )
-        ],
+            _appBar,
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget get _appBar {
+    return Opacity(
+      opacity: _appBarAlpha,
+      child: Container(
+        height: 80,
+        decoration: const BoxDecoration(color: Colors.white),
+        child: const Center(
+          child: Padding(
+            padding: EdgeInsets.only(top: 20),
+            child: Text('首頁'),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget get _banner {
+    return SizedBox(
+      height: 160,
+      child: Swiper(
+        itemCount: _bannerList.length,
+        autoplay: true,
+        itemBuilder: (BuildContext context, int i) {
+          return Image.network(
+            _bannerList[i].icon!,
+            fit: BoxFit.cover,
+          );
+        },
+        pagination: const SwiperPagination(),
+      ),
+    );
+  }
+
+  Widget get _listView {
+    return ListView(
+      children: [
+        _banner,
+        Padding(
+          padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
+          child: LocalNav(localNavList: _localNavList),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
+          child: GridNav(gridNavModel: _gridNavModel),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
+          child: SubNav(subNavList: _subNavList),
+        ),
+        Container(
+          margin: const EdgeInsets.only(top: 8),
+          child: SalesBox(salesBoxModel: _salesBoxModel),
+        )
+      ],
     );
   }
 }
