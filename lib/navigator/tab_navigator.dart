@@ -46,6 +46,9 @@ class _TabNavigatorState extends State<TabNavigator> {
             unselectedLabelStyle: TextStyle(color: _defaultColor),
             selectedItemColor: _activeColor,
             unselectedItemColor: _defaultColor,
+            unselectedFontSize: 14.0,
+            showUnselectedLabels: true,
+            type: BottomNavigationBarType.fixed,
             items: const [
               BottomNavigationBarItem(
                 icon: Icon(Icons.home),
