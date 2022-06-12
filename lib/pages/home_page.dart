@@ -16,11 +16,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final _imageUrls = [
-    'http://s.newtalk.tw/album/album/1/5f292c6b25a74.jpg',
-    'http://s.newtalk.tw/album/album/1/5f2ba1d3d0c83.jpg',
-    'http://s.newtalk.tw/album/album/1/5f2bd3ae5e8ee.jpg'
-  ];
+  List<CommonModel> _bannerList = [];
   List<CommonModel> _localNavList = [];
   double _appBarAlpha = 0;
 
@@ -47,6 +43,7 @@ class _HomePageState extends State<HomePage> {
       HomeModel model = await HomeDao.fetch();
       setState(() {
         _localNavList = model.localNavList!;
+        _bannerList = model.bannerList!;
       });
     } catch (e) {
       print(e);
@@ -75,11 +72,11 @@ class _HomePageState extends State<HomePage> {
                     SizedBox(
                       height: 160,
                       child: Swiper(
-                        itemCount: _imageUrls.length,
+                        itemCount: _bannerList.length,
                         autoplay: true,
                         itemBuilder: (BuildContext context, int i) {
                           return Image.network(
-                            _imageUrls[i],
+                            _bannerList[i].icon!,
                             fit: BoxFit.cover,
                           );
                         },
