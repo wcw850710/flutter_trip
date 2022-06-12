@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_trip/lib/parse_color.dart';
 import 'package:webview_flutter/webview_flutter.dart' as WebviewFlutter;
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -62,7 +63,7 @@ class _WebViewState extends State<WebView> {
       body: Column(
         children: [
           _appBar(
-            Color(int.parse('0xff${_statusBarColor}')),
+            parseColor(_statusBarColor),
             _backButtonColor,
           ),
           Expanded(

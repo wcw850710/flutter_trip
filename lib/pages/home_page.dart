@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
 import 'package:flutter_trip/dao/home_dao.dart';
 import 'package:flutter_trip/model/common_model.dart';
+import 'package:flutter_trip/model/grid_nav_model.dart';
 import 'package:flutter_trip/model/home_model.dart';
 import 'package:flutter_trip/widgets/grid_nav.dart';
 import 'package:flutter_trip/widgets/local_nav.dart';
@@ -18,6 +19,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List<CommonModel> _bannerList = [];
   List<CommonModel> _localNavList = [];
+  GridNavModel? _gridNavModel;
   double _appBarAlpha = 0;
 
   @override
@@ -44,6 +46,7 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _localNavList = model.localNavList!;
         _bannerList = model.bannerList!;
+        _gridNavModel = model.gridNav;
       });
     } catch (e) {
       print(e);
@@ -57,43 +60,46 @@ class _HomePageState extends State<HomePage> {
       body: Stack(
         children: [
           MediaQuery.removePadding(
-              context: context,
-              removeTop: true, // 移除上方安全區域
-              child: NotificationListener(
-                onNotification: (ScrollNotification ev) {
-                  // 是 listview 滾動時才觸發, depth 是 child 第 ? 個可滾動元素
-                  if (ev is ScrollUpdateNotification && ev.depth == 0) {
-                    _onScroll(ev.metrics.pixels);
-                  }
-                  return false;
-                },
-                child: ListView(
-                  children: [
-                    SizedBox(
-                      height: 160,
-                      child: Swiper(
-                        itemCount: _bannerList.length,
-                        autoplay: true,
-                        itemBuilder: (BuildContext context, int i) {
-                          return Image.network(
-                            _bannerList[i].icon!,
-                            fit: BoxFit.cover,
-                          );
-                        },
-                        pagination: const SwiperPagination(),
-                      ),
+            context: context,
+            removeTop: true, // 移除上方安全區域
+            child: NotificationListener(
+              onNotification: (ScrollNotification ev) {
+                // 是 listview 滾動時才觸發, depth 是 child 第 ? 個可滾動元素
+                if (ev is ScrollUpdateNotification && ev.depth == 0) {
+                  _onScroll(ev.metrics.pixels);
+                }
+                return false;
+              },
+              child: ListView(
+                children: [
+                  SizedBox(
+                    height: 160,
+                    child: Swiper(
+                      itemCount: _bannerList.length,
+                      autoplay: true,
+                      itemBuilder: (BuildContext context, int i) {
+                        return Image.network(
+                          _bannerList[i].icon!,
+                          fit: BoxFit.cover,
+                        );
+                      },
+                      pagination: const SwiperPagination(),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
-                      child: LocalNav(localNavList: _localNavList),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
+                    child: LocalNav(localNavList: _localNavList),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
+                    child: GridNav(
+                      gridNavModel: _gridNavModel,
                     ),
-                    SizedBox(
-                      height: 1000,
-                      child: Text('123'),
-                    )
-                  ],
-                ),
-              )),
+                  ),
+                ],
+              ),
+            ),
+          ),
           Opacity(
             opacity: _appBarAlpha,
             child: Container(
