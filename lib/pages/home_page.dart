@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
+import 'package:flutter_trip/dao/home_dao.dart';
+import 'package:flutter_trip/model/common_model.dart';
+import 'package:flutter_trip/model/home_model.dart';
+import 'package:flutter_trip/widgets/grid_nav.dart';
+import 'package:flutter_trip/widgets/local_nav.dart';
 
 const double appbarScrollOffset = 100;
 
@@ -16,7 +21,14 @@ class _HomePageState extends State<HomePage> {
     'http://s.newtalk.tw/album/album/1/5f2ba1d3d0c83.jpg',
     'http://s.newtalk.tw/album/album/1/5f2bd3ae5e8ee.jpg'
   ];
+  List<CommonModel> _localNavList = [];
   double _appBarAlpha = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
 
   _onScroll(double scrollTop) {
     double alpha = scrollTop / appbarScrollOffset;
@@ -30,9 +42,21 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  _loadData() async {
+    try {
+      HomeModel model = await HomeDao.fetch();
+      setState(() {
+        _localNavList = model.localNavList!;
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xfff2f2f2),
       body: Stack(
         children: [
           MediaQuery.removePadding(
@@ -62,6 +86,10 @@ class _HomePageState extends State<HomePage> {
                         pagination: const SwiperPagination(),
                       ),
                     ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
+                      child: LocalNav(localNavList: _localNavList),
+                    ),
                     SizedBox(
                       height: 1000,
                       child: Text('123'),
@@ -70,17 +98,18 @@ class _HomePageState extends State<HomePage> {
                 ),
               )),
           Opacity(
-              opacity: _appBarAlpha,
-              child: Container(
-                height: 80,
-                decoration: const BoxDecoration(color: Colors.white),
-                child: const Center(
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 20),
-                    child: Text('首頁'),
-                  ),
+            opacity: _appBarAlpha,
+            child: Container(
+              height: 80,
+              decoration: const BoxDecoration(color: Colors.white),
+              child: const Center(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 20),
+                  child: Text('首頁'),
                 ),
-              ))
+              ),
+            ),
+          )
         ],
       ),
     );
